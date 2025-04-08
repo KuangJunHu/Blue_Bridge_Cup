@@ -1,0 +1,186 @@
+#include "interrupt.h"
+#include "tim.h"
+#include "string.h"
+
+struct keys key[4]={0};
+unsigned char  rx[10];
+unsigned char RX_Buff;
+int idx=0;
+
+void key_Event_Handler(bool ,bool ,bool );
+
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim->Instance == TIM1)
+    {
+		key_Event_Handler(0,0,1);
+		HAL_TIM_Base_Start_IT(&htim1);
+	}
+}
+
+/*void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	rx[idx++]=RX_Buff;
+	HAL_UART_Receive_IT(&huart1,&RX_Buff,1);
+}*/
+
+double getADC(ADC_HandleTypeDef *hadc)
+{
+	int value = 0;
+	HAL_ADC_Start(hadc);
+	value = HAL_ADC_GetValue(hadc);
+	return value*3.3/4096;
+}
+
+void LED_Disp(int dsLED)
+{
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_All,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC,dsLED<<8,GPIO_PIN_RESET);//
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
+}
+/**
+	@brief 获取某个按键的LCD状态成员变量
+	@param i 要获取的按键在key结构体数组中的索引
+	@retval int类型，返回指定按键的LCD状态
+*/
+int get_key_stat(int i)
+{
+	return key[i].Lcd_sta;
+}
+
+/**
+	@brief 设置某个按键的LCD状态成员变量
+	@param i 要设置的按键在key结构体数组中的索引
+	@param value 要设置的按键的LCD状态值
+	@retval 无
+*/
+void set_key_stat(int i,bool value)
+{
+	key[i].Lcd_sta = value;
+}
+
+
+/**
+	@brief 处理键盘事件，根据按键状态和延时时间判断事件类型和相应操作
+	@param Long_press: bool类型，用于判断是否检测到长按事件
+	@param Double_click: bool类型，用于判断是否检测到双击事件
+	@param Single_click: bool类型，用于判断是否检测到单击事件
+	@retval 无返回值 
+*/ 
+//解决了双击偶尔会出现的bug，和只设置长按，没有按到时间，而没有清零
+void key_Event_Handler(bool Long_press,bool Double_click,bool Single_click)
+{
+	static int key_delaytim = 0;
+	static int debounce = 1;
+	
+	for(int i=0;i<4;i++)
+	{
+		key[0].key_sta = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0);
+		key[1].key_sta = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1);
+		key[2].key_sta = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_2);
+		key[3].key_sta = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+		switch (key[i].judge_sta)
+		{
+		case 0: 
+			if (key[i].key_sta == GPIO_PIN_RESET)
+			{
+				key_delaytim++;
+				if(Double_click)	{debounce = 2 ;}
+				else 				{debounce = 1 ;}
+				if(key_delaytim >= debounce)
+				{
+					key[i].judge_sta = 1; 
+				}
+			}
+			break;
+		case 1: 
+			if (key[i].key_sta == GPIO_PIN_RESET) 
+			{
+				key_delaytim++;
+				if(key_delaytim >= BUTTON_LONG_TIME && Long_press)
+				{ 
+					key[i].judge_sta = 2;
+				}
+			}
+			else
+			{
+				key_delaytim = 0;
+				key[i].judge_sta = 3; 
+			}
+			break;
+		case 2:
+			if(key[i].key_sta == GPIO_PIN_SET)
+			{
+				key_delaytim = 0;
+				key[i].Lcd_sta = 3; 
+				key[i].judge_sta = 0;
+			}
+			break;
+		case 3:
+			if(key[i].key_sta == GPIO_PIN_SET)
+			{
+				key_delaytim++;
+				if(Double_click)
+				{
+					key[i].judge_sta = 4;
+				}
+				else if(Single_click)
+				{
+					key_delaytim = 0;
+					key[i].Lcd_sta = 1;
+					key[i].judge_sta = 0;
+				}
+				else
+				{
+					key_delaytim = 0;
+					key[i].Lcd_sta = 0; 
+					key[i].judge_sta = 0;
+				}
+			}
+			break;
+		case 4:
+			if(key[i].key_sta == GPIO_PIN_SET)
+			{
+				key_delaytim++;
+				if(Single_click)
+				{
+					if(key_delaytim >= BUTTON_DOUBLE_TIME)
+					{
+						key_delaytim = 0;
+						key[i].Lcd_sta = 1;
+						key[i].judge_sta = 0; 						
+					} 
+				}
+				else if(key_delaytim >= BUTTON_DOUBLE_TIME)
+				{
+					key_delaytim = 0;
+					key[i].judge_sta = 0; 						
+				}
+			}
+			else
+			{
+				key[i].judge_sta = 5; 
+			}
+			break;
+		case 5:
+			if(key[i].key_sta == GPIO_PIN_SET)
+			{
+				key_delaytim = 0;
+				key[i].Lcd_sta = 2;
+				key[i].judge_sta = 0;
+			}
+			break;
+		}
+	}
+}
+
+
+
+
+
+
+
+
