@@ -50,12 +50,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 		
 	}
 }
-
+int time_cnt1 = 0,time_cnt2 = 0,time_cnt3 = 0;
 void key_Event_Handler(bool Long_press,bool Double_click,bool Single_click)
 {
-	static int key_delaytim = 0;
-	static int debounce = 1;
-	
 	for(int i=0;i<4;i++)
 	{
 		key[0].key_sta = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0);
@@ -67,34 +64,28 @@ void key_Event_Handler(bool Long_press,bool Double_click,bool Single_click)
 		case 0: 
 			if (key[i].key_sta == GPIO_PIN_RESET)
 			{
-				key_delaytim++;
-				if(Double_click)	{debounce = 10;}
-				else 				{debounce = 1 ;}
-				if(key_delaytim >= debounce)
-				{
-					key[i].judge_sta = 1; 
-				}
+				key[i].key_delaytim++;
+				key[i].judge_sta = 1; 
 			}
 			break;
 		case 1: 
+			key[i].key_delaytim++;
 			if (key[i].key_sta == GPIO_PIN_RESET) 
 			{
-				key_delaytim++;
-				if(key_delaytim >= BUTTON_LONG_TIME && Long_press)
+				if(key[i].key_delaytim >= BUTTON_LONG_TIME && Long_press)
 				{ 
 					key[i].judge_sta = 2;
 				}
 			}
 			else
 			{
-				key_delaytim = 0;
 				key[i].judge_sta = 3; 
 			}
 			break;
 		case 2:
 			if(key[i].key_sta == GPIO_PIN_SET)
 			{
-				key_delaytim = 0;
+				key[i].key_delaytim = 0;
 				key[i].Lcd_sta = 3; 
 				key[i].judge_sta = 0;
 			}
@@ -102,20 +93,20 @@ void key_Event_Handler(bool Long_press,bool Double_click,bool Single_click)
 		case 3:
 			if(key[i].key_sta == GPIO_PIN_SET)
 			{
-				key_delaytim++;
+				key[i].key_delaytim++;
 				if(Double_click)
 				{
 					key[i].judge_sta = 4;
 				}
 				else if(Single_click)
 				{
-					key_delaytim = 0;
+					key[i].key_delaytim = 0;
 					key[i].Lcd_sta = 1;
 					key[i].judge_sta = 0;
 				}
 				else
 				{
-					key_delaytim = 0;
+					key[i].key_delaytim = 0;
 					key[i].Lcd_sta = 0; 
 					key[i].judge_sta = 0;
 				}
@@ -124,19 +115,19 @@ void key_Event_Handler(bool Long_press,bool Double_click,bool Single_click)
 		case 4:
 			if(key[i].key_sta == GPIO_PIN_SET)
 			{
-				key_delaytim++;
+				key[i].key_delaytim++;
 				if(Single_click)
 				{
-					if(key_delaytim >= BUTTON_DOUBLE_TIME)
+					if(key[i].key_delaytim >= BUTTON_DOUBLE_TIME)
 					{
-						key_delaytim = 0;
+						key[i].key_delaytim = 0;
 						key[i].Lcd_sta = 1;
 						key[i].judge_sta = 0; 						
 					} 
 				}
-				else if(key_delaytim >= BUTTON_DOUBLE_TIME)
+				else if(key[i].key_delaytim >= BUTTON_DOUBLE_TIME)
 				{
-					key_delaytim = 0;
+					key[i].key_delaytim = 0;
 					key[i].judge_sta = 0; 						
 				}
 			}
@@ -148,7 +139,7 @@ void key_Event_Handler(bool Long_press,bool Double_click,bool Single_click)
 		case 5:
 			if(key[i].key_sta == GPIO_PIN_SET)
 			{
-				key_delaytim = 0;
+				key[i].key_delaytim = 0;
 				key[i].Lcd_sta = 2;
 				key[i].judge_sta = 0;
 			}

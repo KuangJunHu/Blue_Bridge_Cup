@@ -8,9 +8,8 @@
 #define IC_R38 hadc1
 #define IC_R39 htim3
 #define IC_R40 htim2
-
-#define BUTTON_SINGLE_TIME 	(10)                   	
-#define BUTTON_DOUBLE_TIME	(50-BUTTON_SINGLE_TIME)	
+                  	
+#define BUTTON_DOUBLE_TIME	(50)	
 #define BUTTON_LONG_TIME  	(100)              		
 
 typedef struct 
@@ -18,6 +17,7 @@ typedef struct
 	unsigned char judge_sta;	
 	bool key_sta;			
 	unsigned char Lcd_sta; 	
+	int key_delaytim;
 }keys;
 typedef struct
 {
