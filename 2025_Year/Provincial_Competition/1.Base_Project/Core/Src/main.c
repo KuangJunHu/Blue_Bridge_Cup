@@ -85,7 +85,7 @@ void Key_Proc()
 void LCD_Proc()
 {
 	LED &= 0xfe;
-	sprintf(key_sta,"1:%d,2:%d,3:%d,4:%d",get_key_stat(0),get_key_stat(1),get_key_stat(2),get_key_stat(3));
+	sprintf(key_sta,"1:%d,2:%d,3:%d,4:%d",get_key_stat(1),get_key_stat(2),get_key_stat(3),get_key_stat(4));
 	LCD_DisplayStringLine(Line1,(u8 *)key_sta);
 	sprintf(key_sta,"R37:%.2f,R38:%.2f ",Read_ADC(&IC_R37),Read_ADC(&IC_R38));
 	LCD_DisplayStringLine(Line2,(u8 *)key_sta);
@@ -157,14 +157,14 @@ int main(void)
 	HAL_ADCEx_Calibration_Start(&hadc2,ADC_SINGLE_ENDED);
 	HAL_ADC_Start(&hadc1);
 	HAL_ADC_Start(&hadc2);
-	I2CInit();
-	x24c02_write(0x00,'1');
-	HAL_Delay(10);
-	char x= x24c02_read(0x00);
-	HAL_Delay(1000);
-	Set_FreCycle(100);
-	HAL_Delay(10);
-	Set_DutyCycle(30);
+//	I2CInit();
+//	x24c02_write(0x00,'1');
+//	HAL_Delay(10);
+//	char x= x24c02_read(0x00);
+//	HAL_Delay(1000);
+//	Set_FreCycle(100);
+//	HAL_Delay(10);
+//	Set_DutyCycle(30);
   /* USER CODE END 2 */
 
   /* Infinite loop */

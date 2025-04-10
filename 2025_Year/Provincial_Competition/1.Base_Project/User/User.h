@@ -19,6 +19,7 @@ typedef struct
 	unsigned char Lcd_sta; 	
 	int key_delaytim;
 }keys;
+
 typedef struct
 {
 	unsigned char  data[100];
