@@ -192,7 +192,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM6)
 	{
-			key_Event_Handler(0x01,0x01,0x01);
+			key_Event_Handler(0x1,0x1,0xf);
 			HAL_TIM_Base_Start_IT(&htim6);
 	}
 }

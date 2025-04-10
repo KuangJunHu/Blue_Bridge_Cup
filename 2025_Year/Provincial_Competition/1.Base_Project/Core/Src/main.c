@@ -174,10 +174,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  LCD_Proc();
-	  Key_Proc();
-	  Uart_Proc();
-	  LED_Proc();
+	sprintf(key_sta,"1:%d,2:%d,3:%d,4:%d",get_key_stat(1),get_key_stat(2),get_key_stat(3),get_key_stat(4));
+	LCD_DisplayStringLine(Line1,(u8 *)key_sta);
+//	  LCD_Proc();
+//	  Key_Proc();
+//	  Uart_Proc();
+//	  LED_Proc();
   }
   /* USER CODE END 3 */
 }
